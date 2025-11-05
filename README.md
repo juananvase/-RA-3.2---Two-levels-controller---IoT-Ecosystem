@@ -27,6 +27,7 @@ Diseñamos un prototipo que mide humedad y genera alertas remotas mediante IoT. 
 <img width="497" height="897" alt="DiagramaActividad" src="https://github.com/user-attachments/assets/e1812dd6-e3ac-408d-ad99-24b9f24bd5fa" />
 
 #Pruebas y validación
+
 Para probar la comunicación I2C se realizó un print para visualizar la lectura de humedad en la consola; se revisaron iteradas lecturas teniendo el sensor seco y envuelto en un paño húmedo.
 
 Para probar la conexión con ThingSpeak, primero fue necesario implementar el sensor de humedad. Se utilizó el panel de lectura y se revisó que se mostrará el mismo valor que en consola local.
@@ -40,6 +41,7 @@ El principal hallazgo fue un retardo perceptible en el envío a través del mód
 En el siguiente video se muestra el sistema funcionando:
 link
 # Documentación del Código
+## Script Esclavo
 ```
 /*
   -----------------------------------------------
@@ -120,4 +122,9 @@ void loop() {
 void requestEvent() {
   Wire.write(humidityValue); // Respuesta inmediata al maestro
 }
+```
+
+## Script Esclavo
+```
+
 ```
