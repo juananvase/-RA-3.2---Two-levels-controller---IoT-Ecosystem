@@ -367,7 +367,7 @@ bool postToThingSpeak(int humidity) {
 3. Guion y logística de video demo (escenas y tiempos).
 4. Checklist de rúbrica (claridad, trazabilidad, evidencias).
 
-###Lecciones aprendidas:
+### Lecciones aprendidas:
 
 * La arquitectura I2C es estable; el cuello de botella fue la latencia Wi-Fi.
 * Las estrategias de intervalo ≥20s y reintentos mejoraron la confiabilidad.
