@@ -38,7 +38,9 @@ La arquitectura I2C se implementó y funcionó correctamente; el Arduino esclavo
 El principal hallazgo fue un retardo perceptible en el envío a través del módulo wifi; la actualización del dashboard tardó más de lo deseado por mucha latencia. La medición local e I2C se mantuvo rápida y consistente; el retraso provino del módulo wifi. para mitigarlo se amplió el intervalo de publicación con el fin de evitar la congestión.
 
 En el siguiente video se muestra el sistema funcionando:
-link
+
+https://unisabanaedu-my.sharepoint.com/:v:/g/personal/juanvase_unisabana_edu_co/EWjG3Fc9NKdNhGjtlXD9fDUBUyoGFIsotscHhXLrsrnFPg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=79nwSa
+
 # Documentación del Código
 ## Script Esclavo
 ```
