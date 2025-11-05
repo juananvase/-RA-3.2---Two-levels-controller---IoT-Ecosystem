@@ -12,14 +12,20 @@ Diseñamos un prototipo que mide humedad y genera alertas remotas mediante IoT. 
 * Sensor de humedad de sustrato fc-28.
 * Modulo wi-fi esp015.
 * Protoboard.
+
 <img width="1052" height="590" alt="image" src="https://github.com/user-attachments/assets/92bccc98-8665-4a18-b295-5bab04b794c5" />
+
 ## Software
 * Script en C# para arduino encargado de la lectura de la humedad, filtrado, registro local y respuesta a read I2C.
 * Script en C# para arduino que por medio de un loop solicita el porcentaje de humedad, evalúa si es necesario mandar una alerta basado en el umbral y envía la información a ThingSpeak para su actualización.
 * Dashboard en ThingSpeak con panel de humedad actual, gráfica de humedad a través del tiempo e indicador de alerta.
+
 <img width="1234" height="790" alt="image" src="https://github.com/user-attachments/assets/4e7b8740-6c0b-4b8d-bf3d-03588b80d94b" />
+
 # Diagrama de actividad
+
 <img width="497" height="897" alt="DiagramaActividad" src="https://github.com/user-attachments/assets/e1812dd6-e3ac-408d-ad99-24b9f24bd5fa" />
+
 #Pruebas y validación
 Para probar la comunicación I2C se realizó un print para visualizar la lectura de humedad en la consola; se revisaron iteradas lecturas teniendo el sensor seco y envuelto en un paño húmedo.
 
