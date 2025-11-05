@@ -26,8 +26,7 @@ Diseñamos un prototipo que mide humedad y genera alertas remotas mediante IoT. 
 
 <img width="497" height="897" alt="DiagramaActividad" src="https://github.com/user-attachments/assets/e1812dd6-e3ac-408d-ad99-24b9f24bd5fa" />
 
-#Pruebas y validación
-
+# Pruebas y validación
 Para probar la comunicación I2C se realizó un print para visualizar la lectura de humedad en la consola; se revisaron iteradas lecturas teniendo el sensor seco y envuelto en un paño húmedo.
 
 Para probar la conexión con ThingSpeak, primero fue necesario implementar el sensor de humedad. Se utilizó el panel de lectura y se revisó que se mostrará el mismo valor que en consola local.
@@ -45,27 +44,20 @@ link
 ```
 /*
   -----------------------------------------------
-  Nodo Periférico I²C - Lectura de Humedad (simulada)
+  Nodo Periférico I²C - Lectura de Humedad
   -----------------------------------------------
   Rol:
     - Actúa como ESCLAVO I²C (addr = 0x08).
-    - Lee un valor analógico en A0 (0..1023) como “humedad simulada”.
-    - Convierte a % de humedad (0..100) y lo entrega al maestro cuando se lo solicita.
+    - Lee un valor analógico como “humedad simulada”.
+    - Convierte a % de humedad y lo entrega al maestro cuando se lo solicita.
 
   Hardware:
-    - SENSOR_PIN (A0): conectar a salida analógica del sensor o potenciómetro.
-    - I²C: SDA/SCL del microcontrolador + resistencias pull-up (si tu placa no las trae).
+    - SENSOR_PIN: conectar a salida analógica del sensor o potenciómetro.
+    - I²C: SDA/SCL del microcontrolador + resistencias pull-up.
     - Dirección I²C: 0x08.
 
   Protocolo:
     - El maestro hace un request (I²C read). Este esclavo responde con 1 byte (0..100).
-
-  Nota:
-    - Este ejemplo “invierte” la lectura (map 0→100, 1023→0). Útil para sensores
-      donde valor analógico bajo = humedad alta. Ajusta el map si tu sensor es directo.
-
-  Autor: (tu nombre/equipo)
-  Fecha: (AAAA-MM-DD)
 */
 
 #include <Wire.h>
@@ -126,5 +118,203 @@ void requestEvent() {
 
 ## Script Esclavo
 ```
+/*
+  -------------------------------------------------------------
+  Controlador (I2C Master) + Uplink IoT (ThingSpeak vía ESP-01)
+  -------------------------------------------------------------
+  Rol:
+    - Lee 1 byte de humedad (%) desde un ESCLAVO I2C (addr 0x08).
+    - Enciende LED si humedad > umbral.
+    - Publica la humedad en ThingSpeak (HTTP POST) cada ≥20 s.
 
+  Hardware:
+    - I2C Master.
+    - I2C Slave.
+    - ESP-01 (AT firmware) conectado por SoftwareSerial:
+        D2 = RX (del micro) -> TX del ESP-01
+        D3 = TX (del micro) -> RX del ESP-01
+
+  Notas:
+    - ThingSpeak limita a ~15 s mínimo entre updates. Aquí usamos 20 s.
+    - Las credenciales WiFi y apiKey están en texto plano (solo prototipos).
+    - Librerías: Wire, SoftwareSerial, WiFiEspAT.
+
+*/
+
+#include <Wire.h>
+#include <SoftwareSerial.h>
+#include <WiFiEspAT.h>
+
+// -------- Configuración I2C / IO ----------
+#define SLAVE_ADDR 0x08        // Esclavo I2C que entrega humedad (1 byte)
+#define LED_PIN    13          // LED indicador
+
+// --------- UART para el ESP-01 (AT) --------
+SoftwareSerial espSerial(2, 3); // RX (D2), TX (D3)
+
+// --------- WiFi / ThingSpeak ---------------
+char ssid[] = "Sebas";
+char pass[] = "Hanamaru123";
+
+const char* server = "api.thingspeak.com";
+String apiKey = "57ZRJ6EBXJRBM9NE";  // API Key de escritura (Write API Key)
+
+WiFiClient client;
+
+// --------- Timers / Constantes -------------
+unsigned long lastRead = 0;
+const unsigned long INTERVAL = 20000UL;  // 20 s (≥15 s recomendado por ThingSpeak)
+const uint8_t HUM_LED_THRESHOLD = 3;     // Umbral simple para LED
+
+// ---------- Prototipos ----------
+bool ensureWiFi();
+bool postToThingSpeak(int humidity);
+int  readHumidityFromSlave();
+
+// =========================================================
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();                        // I2C Master
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+
+  // Iniciar ESP-01 (AT) con WiFiEspAT
+  espSerial.begin(115200);
+  WiFi.init(&espSerial);
+
+  Serial.println(F("Inicializando modulo WiFi (ESP-01 AT)..."));
+  if (WiFi.status() == WL_NO_MODULE) {
+    Serial.println(F("ERROR: No se detecta el modulo WiFi."));
+    while (true) { delay(1000); }
+  }
+
+  // Intento de conexión inicial
+  ensureWiFi();
+}
+
+// =========================================================
+void loop() {
+  // Publicación periódica
+  if (millis() - lastRead >= INTERVAL) {
+    lastRead = millis();
+
+    // (1) Asegurar WiFi conectado
+    if (!ensureWiFi()) {
+      Serial.println(F("WiFi no disponible. Se reintentara en el siguiente ciclo."));
+      return;
+    }
+
+    // (2) Leer 1 byte del esclavo I2C
+    int humidity = readHumidityFromSlave();
+    if (humidity < 0) {  // -1 => sin datos
+      Serial.println(F("No hay datos del esclavo."));
+      return;
+    }
+
+    // (3) Lógica local simple (LED)
+    digitalWrite(LED_PIN, (humidity > HUM_LED_THRESHOLD) ? HIGH : LOW);
+
+    // (4) Enviar a ThingSpeak
+    if (postToThingSpeak(humidity)) {
+      Serial.print(F("Dato enviado a ThingSpeak: "));
+      Serial.println(humidity);
+    } else {
+      Serial.println(F("Error al enviar a ThingSpeak."));
+    }
+  }
+}
+
+// =========================================================
+// Asegura que haya conexión WiFi. Reintenta si se perdió.
+bool ensureWiFi() {
+  if (WiFi.status() == WL_CONNECTED) return true;
+
+  Serial.print(F("Conectando a "));
+  Serial.println(ssid);
+  WiFi.begin(ssid, pass);
+
+  unsigned long t0 = millis();
+  const unsigned long TO = 15000; // 15 s timeout
+  while (WiFi.status() != WL_CONNECTED && (millis() - t0) < TO) {
+    delay(500);
+    Serial.print('.');
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print(F("WiFi OK, IP: "));
+    Serial.println(WiFi.localIP());
+    return true;
+  } else {
+    Serial.println(F("Timeout de conexion WiFi."));
+    return false;
+  }
+}
+
+// =========================================================
+// Lee 1 byte del esclavo I2C (0..100). Devuelve -1 si falla.
+int readHumidityFromSlave() {
+  Wire.requestFrom(SLAVE_ADDR, 1);
+  if (Wire.available() < 1) return -1;
+
+  int h = Wire.read();
+  // Sanidad del dato (clamp 0..100)
+  if (h < 0)   h = 0;
+  if (h > 100) h = 100;
+
+  Serial.print(F("HUM: "));
+  Serial.println(h);
+  return h;
+}
+
+// =========================================================
+// Envia la humedad a ThingSpeak por HTTP POST.
+// Devuelve true si el servidor responde con "200 OK".
+bool postToThingSpeak(int humidity) {
+  // Construir payload
+  String postStr = "api_key=" + apiKey;
+  postStr += "&field1=" + String(humidity);
+
+  // Abrir socket TCP:80
+  if (!client.connect(server, 80)) {
+    Serial.println(F("No se pudo conectar al servidor."));
+    return false;
+  }
+
+  // HTTP/1.1 POST
+  client.println(F("POST /update HTTP/1.1"));
+  client.println(F("Host: api.thingspeak.com"));
+  client.println(F("Connection: close"));
+  client.println(F("Content-Type: application/x-www-form-urlencoded"));
+  client.print  (F("Content-Length: "));
+  client.println(postStr.length());
+  client.println();
+  client.print(postStr);
+
+  // Leer respuesta básica (codigo HTTP)
+  bool ok = false;
+  unsigned long t0 = millis();
+  while (client.connected() && (millis() - t0) < 3000) {
+    if (client.available()) {
+      String line = client.readStringUntil('\n');
+      // Espera cabecera "HTTP/1.1 200 OK"
+      if (line.startsWith("HTTP/1.1 200")) ok = true;
+      // Fin de cabeceras
+      if (line == "\r") break;
+    }
+  }
+  // Consumir cuerpo (opcional)
+  while (client.available()) client.read();
+
+  client.stop();
+  return ok;
+}
 ```
+
+# Actas
+## Acta 1
+aca
+## Acta 2
+aca
+## Acta 3
+aca
