@@ -312,9 +312,27 @@ bool postToThingSpeak(int humidity) {
 ```
 
 # Actas
-## Acta 1
+## Acta 1 - Planeación de la implementación del proyecto
+*__Proyecto:__ Sistema de monitoreo y publicación IoT (Humedad) con arquitectura I2C
+*__Fecha:__ 27/10/2025 — Hora: 9am - 11am — Lugar/Medio: Universidad de La Sabana
+*__Miebros:__ Sebastian Rodriguez y Juan Valderrama.
+*__Objetivo de la reunión:__ Definir alcance, arquitectura y plan de trabajo inicial.
+### Orden del día:
+1. Alcance del prototipo y criterios de éxito.
+2. Arquitectura de 2 capas (I2C) y flujo de datos a ThingSpeak.
+3. Variable a medir (Humedad) y frecuencia de muestreo.
+4. Plan de pruebas y evidencias para el informe.
+### Desarrollo y acuerdos:
+* Alcance: Prototipo funcional que lea Humedad (esclavo) y publique en ThingSpeak (maestro), con alerta basada en umbral.
+* Arquitectura: Capa Esclavo I2C (lectura de humedad y filtrado) + Capa Maestro (consulta I2C, lógica de alerta, envío a IoT).
+* Variables/frecuencia: Humedad cada 10–30 s; para pruebas extendidas; publicación ≥20 s por límite de ThingSpeak.
+* Pruebas: comunicación I2C estable, publicación IoT, activación de alerta y registro histórico.
+* Entrega: reporte con diagrama de actividad, código documentado y capturas del dashboard.
+
+
+*__Cierre:__ Se aprueba el plan y se convoca a reunión de compras/asignación de tareas.
+
+## Acta 2 - Compra de materiales y división del trabajo
 aca
-## Acta 2
-aca
-## Acta 3
+## Acta 3 - Elaboración del informe y grabación del video
 aca
