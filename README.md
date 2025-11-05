@@ -313,10 +313,10 @@ bool postToThingSpeak(int humidity) {
 
 # Actas
 ## Acta 1 - Planeación de la implementación del proyecto
-*__Proyecto:__ Sistema de monitoreo y publicación IoT (Humedad) con arquitectura I2C
-*__Fecha:__ 27/10/2025 — Hora: 9am - 11am — Lugar/Medio: Universidad de La Sabana
-*__Miebros:__ Sebastian Rodriguez y Juan Valderrama.
-*__Objetivo de la reunión:__ Definir alcance, arquitectura y plan de trabajo inicial.
+* __Proyecto:__ Sistema de monitoreo y publicación IoT (Humedad) con arquitectura I2C
+* __Fecha:__ 27/10/2025 — Hora: 2pm - 4pmm — Lugar/Medio: Universidad de La Sabana
+* __Miebros:__ Sebastian Rodriguez y Juan Valderrama.
+* __Objetivo de la reunión:__ Definir alcance, arquitectura y plan de trabajo inicial.
 ### Orden del día:
 1. Alcance del prototipo y criterios de éxito.
 2. Arquitectura de 2 capas (I2C) y flujo de datos a ThingSpeak.
@@ -330,9 +330,46 @@ bool postToThingSpeak(int humidity) {
 * Entrega: reporte con diagrama de actividad, código documentado y capturas del dashboard.
 
 
-*__Cierre:__ Se aprueba el plan y se convoca a reunión de compras/asignación de tareas.
+* __Cierre:__ Se aprueba el plan y se convoca a reunión de compras/asignación de tareas.
 
 ## Acta 2 - Compra de materiales y división del trabajo
-aca
+* __Proyecto:__ Sistema de monitoreo y publicación IoT (Humedad) con arquitectura I2C
+* __Fecha:__ 29/10/2025 — Hora: 9am - 11am — Lugar/Medio: Universidad de La Sabana
+* __Miebros:__ Sebastian Rodriguez y Juan Valderrama.
+* __Objetivo de la reunión:__ Acordar lista de materiales y lista de tareas.
+
+### Materiales acordados:
+* Dos Arduinos modelo MCO-446700374.
+* Sensor de humedad de sustrato fc-28.
+* Modulo wi-fi esp015.
+* Protoboard.
+
+### División del trabajo:
+* Compra de materiales.
+* Codigo Maestro / Esclavo.
+* Dashboard de ThingSpeak.
+* Conexión con dashboard de ThingSpeak.
+* Conexión fisica de la arquitectura.
+* Grabación del video.
+* Documentación.
+
+* __Cierre:__ Se aprueban compras y lista de tareas.
+
 ## Acta 3 - Elaboración del informe y grabación del video
-aca
+* __Proyecto:__ Sistema de monitoreo y publicación IoT (Humedad) con arquitectura I2C
+* __Fecha:__ 29/10/2025 — Hora: 10am - 1pm — Lugar/Medio: Chia
+* __Miebros:__ Sebastian Rodriguez y Juan Valderrama.
+* __Objetivo de la reunión:__ Consolidar resultados, preparar informe final y grabar video de demostración.
+
+### Orden del día:
+1. Revisión de resultados y evidencias (capturas de ThingSpeak, logs, fotos del montaje).
+2. Estructura del informe (contexto, arquitectura I2C, diagrama de actividad, pruebas, resultados, conclusiones).
+3. Guion y logística de video demo (escenas y tiempos).
+4. Checklist de rúbrica (claridad, trazabilidad, evidencias).
+
+###Lecciones aprendidas:
+
+* La arquitectura I2C es estable; el cuello de botella fue la latencia Wi-Fi.
+* Las estrategias de intervalo ≥20s y reintentos mejoraron la confiabilidad.
+
+* __Cierre:__ Se aprueba el guion del video y la estructura final del informe.
